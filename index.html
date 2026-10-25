@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="it" data-tema="scuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Preventivi per piccole e grandi imprese · demo GPN Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* stessi colori della demo dell'elettricista: scuro come l'Ingrosso, chiaro per il sole */
+  :root {
+    --bg: #121316; --foglio: #1A1C21; --fondo: #23262D; --linea: #2E3139; --testo: #ECEDEF; --sec: #8C8F98; --spento: #555962;
+    --pieno: #166534; --verde: #22C55E; --verde-tenue: rgba(34,197,94,.12); --graf: #2E3139;
+  }
+  :root[data-tema="chiaro"] {
+    --bg: #FFFFFF; --foglio: #FFFFFF; --fondo: #F5F4F0; --linea: #DEDCD5; --testo: #111214; --sec: #4A4D55; --spento: #9A9DA4;
+    --pieno: #166534; --verde: #166534; --verde-tenue: #E8F3EC; --graf: #121316;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--testo); font-family: Inter, sans-serif; font-size: 15px; line-height: 1.5; -webkit-tap-highlight-color: transparent; }
+  button { font-family: inherit; color: inherit; background: none; border: 0; cursor: pointer; text-align: left; }
+
+  /* telefono: tutta la larghezza; iPad e computer: stessa schermata, colonna centrale fino a 720 px */
+  .app { max-width: 720px; min-height: 100vh; min-height: 100dvh; margin: 0 auto; display: flex; flex-direction: column; }
+
+  .barra { display: flex; align-items: center; justify-content: space-between; padding: 14px 10px 4px 18px; }
+  .logo { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.5px; }
+  .logo i { font-style: normal; color: var(--pieno); }
+  .logo span { color: var(--sec); }
+  .tema { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: var(--sec); }
+  .tema svg { width: 20px; height: 20px; }
+  .tema .luna, [data-tema="chiaro"] .tema .sole { display: none; }
+  [data-tema="chiaro"] .tema .luna { display: block; }
+
+  .testa { padding: 14px 18px 20px; }
+  .occhiello { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--verde); }
+  h1 { font-family: "Space Grotesk", sans-serif; font-size: 30px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; margin-top: 6px; }
+  .sottot { color: var(--sec); font-size: 15px; margin-top: 8px; }
+
+  .elenco { display: flex; flex-direction: column; gap: 10px; padding: 0 14px; }
+  .riga { width: 100%; background: var(--foglio); border: 1px solid var(--linea); border-radius: 16px; padding: 14px; display: flex; align-items: center; gap: 14px; min-height: 92px; }
+  .riga.attiva { border: 2px solid var(--verde); }
+  .riga.arrivo { opacity: .55; }
+  .riquadro { width: 52px; height: 52px; border-radius: 14px; background: var(--fondo); display: flex; align-items: center; justify-content: center; flex: none; color: var(--sec); }
+  .attiva .riquadro { color: var(--verde); }
+  .riquadro svg { width: 30px; height: 30px; }
+  .testo { flex: 1; min-width: 0; }
+  .nome { font-family: "Barlow Condensed", sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; line-height: 1; font-size: 26px; }
+  .riga p { font-size: 13.5px; color: var(--sec); line-height: 1.35; margin-top: 4px; }
+  .pill { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--fondo); color: var(--sec); white-space: nowrap; }
+  .freccia { color: var(--verde); font-size: 26px; font-weight: 600; padding: 0 4px; }
+  .riga.attiva:active { transform: scale(.99); }
+
+  .piede { margin-top: auto; padding: 24px 18px calc(22px + env(safe-area-inset-bottom)); font-size: 13px; color: var(--sec); text-align: center; }
+
+  .toast { position: fixed; left: 50%; bottom: 40px; transform: translate(-50%, 20px); background: var(--graf); color: #fff; font-size: 14px; padding: 12px 16px; border-radius: 12px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; max-width: 340px; text-align: center; z-index: 60; }
+  [data-tema="scuro"] .toast { background: #ECEDEF; color: #121316; }
+  .toast.on { opacity: 1; transform: translate(-50%, 0); }
+</style>
+</head>
+<body>
+<!-- icone dei settori (linee semplici, prendono il colore del testo) -->
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-tutto" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 15 16 6l11 9v12H5z"/><path d="M12 27v-7h8v7"/></g></symbol>
+  <symbol id="i-el" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M18 4 8 18h8l-2 10 10-14h-8z"/></g></symbol>
+  <symbol id="i-ar" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 15v-4a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v4"/><path d="M5 15h22v7H5z"/><path d="M7 22v4M25 22v4"/></g></symbol>
+  <symbol id="i-id" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M16 4c5 7 8 11 8 15a8 8 0 0 1-16 0c0-4 3-8 8-15z"/><path d="M12 20a4 4 0 0 0 4 4"/></g></symbol>
+</svg>
+
+<div class="app">
+  <div class="barra">
+    <span class="logo">gpn<i>·</i><span>lab</span></span>
+    <button class="tema" id="tema" aria-label="Cambia colori: chiaro o scuro">
+      <svg class="sole" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="luna" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>
+    </button>
+  </div>
+
+  <div class="testa">
+    <div class="occhiello">Preventivi per piccole e grandi imprese</div>
+    <h1>Seleziona il settore</h1>
+    <p class="sottot">Il preventivo stanza per stanza, dal telefono.</p>
+  </div>
+
+  <div class="elenco" id="elenco"></div>
+
+  <p class="piede">Aziende, prodotti e prezzi di prova.</p>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+// ---- I settori, nell'ordine scelto da Gaspare. "pronto" = la demo esiste e si apre. ----
+const SETTORI = [
+  { k: "tutto",       nome: "Tutto",        frase: "Tutti i mestieri, un preventivo unico", icona: "i-tutto", pronto: true  },
+  { k: "elettricista",nome: "Elettricista", frase: "Punti luce, prese, quadro",             icona: "i-el",    pronto: true  },
+  { k: "arredamento", nome: "Arredamento",  frase: "Mobili a pezzi e a misura",             icona: "i-ar",    pronto: true  },
+  { k: "idraulica",   nome: "Idraulica",    frase: "Punti acqua, scarichi, sanitari",       icona: "i-id",    pronto: true  },
+];
+
+// Dove si apre ogni demo: sul Mac la cartella accanto, online il suo indirizzo.
+// Ogni settore ha il suo repository: elettricista-demo (lo stesso link della scheda su gpnlab.com), idraulica-demo, arredamento-demo, tutto-demo.
+function indirizzo(k) {
+  const sulMac = location.protocol === "file:" || ["localhost", "127.0.0.1"].includes(location.hostname);
+  const online = {
+    elettricista: "https://ngaspare6-programmer.github.io/elettricista-demo/",
+    idraulica:    "https://ngaspare6-programmer.github.io/idraulica-demo/",
+    arredamento:  "https://ngaspare6-programmer.github.io/arredamento-demo/",
+    tutto:        "https://ngaspare6-programmer.github.io/tutto-demo/",
+  };
+  const base = sulMac ? `../${k}/index.html` : online[k];
+  // "da=settori" fa comparire "‹ Settori" nella demo; il tema passa i colori scelti qui
+  return `${base}?da=settori&tema=${document.documentElement.dataset.tema}`;
+}
+
+document.getElementById("elenco").innerHTML = SETTORI.map(s => `
+  <button class="riga ${s.pronto ? "attiva" : "arrivo"}" data-k="${s.k}" ${s.pronto ? "" : 'aria-disabled="true"'}>
+    <span class="riquadro"><svg><use href="#${s.icona}"/></svg></span>
+    <span class="testo"><span class="nome">${s.nome}</span><p>${s.frase}</p></span>
+    ${s.pronto ? '<span class="freccia" aria-hidden="true">›</span>' : '<span class="pill">In arrivo</span>'}
+  </button>`).join("");
+
+document.getElementById("elenco").addEventListener("click", e => {
+  const b = e.target.closest("[data-k]"); if (!b) return;
+  const s = SETTORI.find(x => x.k === b.dataset.k);
+  if (s.pronto) location.href = indirizzo(s.k);
+  else toast(`${s.nome}: in arrivo, lo stiamo costruendo.`);
+});
+
+document.getElementById("tema").addEventListener("click", () => {
+  const h = document.documentElement;
+  h.dataset.tema = h.dataset.tema === "chiaro" ? "scuro" : "chiaro";
+});
+
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("on");
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("on"), 2200);
+}
+</script>
+</body>
+</html>
